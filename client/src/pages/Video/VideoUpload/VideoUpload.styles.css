@@ -1,0 +1,13 @@
+.uploadVideoWrapper {
+    display: block;
+    text-align: left;
+    min-height: 30vh;
+}
+
+.uploadVideoFileName {
+    overflow: hidden;
+}
+
+.uploadVideoFileName input {
+    cursor: pointer;
+}

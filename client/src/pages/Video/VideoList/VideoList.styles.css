@@ -1,0 +1,12 @@
+.videoListWrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.videoThumbnailImg {
+    background-color: #616161;
+    height: 180px;
+    width: 100%;
+}
