@@ -4,23 +4,23 @@
  1. Frontend client with react 
  2. API/server with express, graphql. Also was used postgresQL and sequelize 
  
-###Frontend consist pages:
+### Frontend consist pages:
  1. List of videos
  2. Upload video
  3. Video page
  4. Edit video
  
-###Server could handle:
+### Server could handle:
  1. Video uploads
  2. Storing videos
  3. Retrieve video item and video list
  4. Edit video
  
-###Stylization
+### Stylization
  1. Bootstrap is used for layout and style components
  2. Css us used for custom styles
  
-###Setup
+### Setup
 For running App we need to have postgresQL, node, npm and good mood)
 
 [Install postgres][postgresi] \
