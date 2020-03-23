@@ -6,7 +6,7 @@ import ReactPlayer from 'react-player'
 import VideoErrorMessage from "../../../../components/VideoErrorMessage";
 import {serverURL} from '../../../../constants';
 
-import {REMOVE_VIDEO_BY_ID} from "./queries";
+import {REMOVE_VIDEO_BY_ID} from "../queries";
 
 import './VideoItemView.styles.css';
 

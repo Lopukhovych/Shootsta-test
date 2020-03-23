@@ -35,7 +35,7 @@ const VideoFormContainer = ({
 				/>
 			</Form.Group>
 			<Form.Group>
-				<div className="input-group col-12 col-sm-8 pl-0">
+				<div className="input-group col-12 col-sm-8 pl-0 uploadVideoBlock">
 					<div className="input-group-prepend">
 				    <span className="input-group-text" id="inputGroupFileAddon01">
 				      Upload video

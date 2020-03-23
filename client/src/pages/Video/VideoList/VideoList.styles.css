@@ -1,13 +1,21 @@
-.videoListWrapper {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
+.video-table-item__wrapper {
+    cursor: pointer;
+}
+
+.video-table-item__wrapper:hover {
+    background: #EEEEEE;
+}
+
+.video-table-item__text-field {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 5px;
+    text-overflow: ellipsis;
 }
 
 .videoThumbnailImg {
     background-color: #616161;
-    height: 180px;
-    width: 100%;
+    width: 120px;
     object-fit: contain;
 }
