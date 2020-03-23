@@ -56,6 +56,7 @@ const VideoItemEditContainer = ({video}) => {
 				}
 			});
 			apolloClient.resetStore();
+			setUploadFile(null);
 		} catch(error) {
 			console.log('submitEditForm error: ', error);
 		}

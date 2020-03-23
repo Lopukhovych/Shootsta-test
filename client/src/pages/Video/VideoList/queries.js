@@ -5,6 +5,7 @@ export const LOAD_VIDEOS_LIST = gql`
   videos {
     id
     title
+    preview
     description
   }
 }

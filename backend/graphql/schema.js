@@ -34,6 +34,9 @@ const VideoType = new GraphQLObjectType({
 		location: {type: GraphQLString},
 		title: {type: GraphQLString},
 		description: {type: GraphQLString},
+		preview: {type: GraphQLString},
+		directory: {type: GraphQLString},
+		deleted: {type: GraphQLBoolean},
 	})
 });
 
@@ -82,7 +85,7 @@ const Mutation = new GraphQLObjectType({
 			},
 			async resolve(parent, {file, title, description}) {
 				try {
-					return loadVideo(file, title, description);
+					return loadVideo({file, title, description});
 				} catch (error) {
 					console.log('error: ', error);
 					return error;
@@ -120,7 +123,7 @@ const Mutation = new GraphQLObjectType({
 			async resolve(parent, {id, file, title, description}) {
 				try {
 					console.log('resolve: ', id, file, title, description);
-					return editVideoData(id, file, title, description);
+					return editVideoData({id, file, title, description});
 				} catch (error) {
 					console.log('error: ', error);
 					return error;
@@ -138,7 +141,7 @@ const Mutation = new GraphQLObjectType({
 						success: false,
 						error: "No id provided"
 					};
-					await deleteVideo(id);
+					return deleteVideo(id);
 				} catch (error) {
 					console.log('deleteVideo error: ', error);
 					return {

@@ -49,9 +49,8 @@ const VideoUploadContainer = () => {
 				history.push(`/video/item/${id}`);
 				return;
 			}
-			new Error(error || 'Couldn\'t upload new video');
+			if (error) setUploadFileError(error);
 		} catch (error) {
-			setUploadFileError(error);
 			console.log('submitUploadForm error: ', error);
 		}
 	};

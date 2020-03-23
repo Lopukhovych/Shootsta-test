@@ -4,13 +4,15 @@ import {LOAD_VIDEOS_LIST} from './queries';
 import {Container, Spinner, Alert, Card, Button} from "react-bootstrap";
 import {Link, Redirect} from 'react-router-dom';
 
+import {serverURL} from '../../../constants';
+
 import './VideoList.styles.css';
 
 function retrieveDataList(videos) {
-	return videos.map(({id, title, description}) => (
+	return videos.map(({id, title, description, preview}) => (
 		<div key={id} className="col-md-4 col-sm-6 col-xs-12 mb-2">
 			<Card >
-				<Card.Img className="videoThumbnailImg" variant="top" src="" alt='Video thumbnail'/>
+				<Card.Img className="videoThumbnailImg" variant="top" src={`${serverURL}/${preview}`} alt='Video thumbnail'/>
 				<Card.Body>
 					<Card.Title>{title}</Card.Title>
 					<Card.Text>

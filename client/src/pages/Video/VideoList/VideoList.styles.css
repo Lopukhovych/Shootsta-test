@@ -9,4 +9,5 @@
     background-color: #616161;
     height: 180px;
     width: 100%;
+    object-fit: contain;
 }

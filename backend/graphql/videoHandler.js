@@ -1,11 +1,18 @@
 const fs = require('fs');
 const Op = require('sequelize').Op;
 const models = require('../models');
-const uuid = require('uuid/v1');
+const {v4: uuidv4} = require('uuid');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+const path = require('path');
+const rimraf = require('rimraf');
 
-const storeFileStream = ({stream, filename}) => {
-	const uploadDirectory = 'files';
-	const path = `${uploadDirectory}/${uuid()}-${filename}`;
+
+ffmpeg.setFfmpegPath(ffmpegPath);
+const uploadDirectory = 'files';
+
+const storeFileStream = ({stream, filename, directory}) => {
+	const path = `${directory}/${filename}`;
 	return new Promise((resolve, reject) =>
 		stream
 			.on('error', error => {
@@ -22,70 +29,105 @@ const storeFileStream = ({stream, filename}) => {
 
 const getVideos = async () => {
 	return models.Video.findAll({
-		limit: 15
+		where: {
+			deleted: false,
+		},
+		limit: 15,
 	}) || [];
 };
 
 const getVideo = async (privateKey) => {
-	return models.Video.findByPk(privateKey);
+	return models.Video.findOne({where: {id: privateKey, deleted: false}});
 };
 
-const loadVideo = async (file, title, description) => {
-	try {
-		// const {title, description} = args;
-		console.log('title, description: ', title, description);
-		console.log('await args.file: ', await file);
-		const {filename, mimetype, createReadStream} = await file;
-		console.log('filename, mimetype, createReadStream: ', filename, mimetype, createReadStream, );
-		const stream = createReadStream();
-		const pathObj = await storeFileStream({stream, filename});
-		const location = pathObj.path;
-		//TODO remove video logging
-		const video = await models.Video.create({
-			location,
-			title,
-			description,
+const createFolder = async () => {
+	let directoryPath = `${uploadDirectory}/${uuidv4()}`;
+	while (await fs.existsSync(directoryPath)) {
+		directoryPath = `${uploadDirectory}/${uuidv4()}`;
+	}
+	await fs.promises.mkdir(directoryPath, {recursive: true});
+	return directoryPath;
+};
+
+const generateScreenShot = async ({location, filename, directory}) => {
+	const fileName = `${path.parse(filename).name}.png`;
+	await ffmpeg(location)
+		.screenshot({
+			timestamps: ['00:00:01'],
+			filename: fileName,
+			folder: directory,
+			size: '320x240'
 		});
-		console.log('video: ', video);
-		return video;
+	return `${directory}/${fileName}`;
+};
+
+const handleUploadVideo = async ({file}) => {
+	const {filename, createReadStream} = await file;
+	const stream = createReadStream();
+	const directory = await createFolder();
+	const pathObj = await storeFileStream({stream, filename, directory});
+	const location = pathObj.path;
+	const preview = await generateScreenShot({location, filename, directory});
+	return {
+		location,
+		directory,
+		preview
+	}
+};
+
+const handleRemoveVideo = async ({directory}) => {
+	try {
+		await rimraf(directory, function () {
+			console.log(`Video ${directory} removed`);
+		});
 	} catch (error) {
 		return error;
 	}
 };
 
-const editVideoData = async (id, file, title, description) => {
-	let location;
-	const video = await  models.Video.findByPk(id);
+const loadVideo = async ({file, title, description}) => {
+	const {location, directory, preview} = await handleUploadVideo({file});
+	return await models.Video.create({
+		location,
+		title,
+		description,
+		preview,
+		directory,
+	});
+
+};
+
+const editVideoData = async ({id, file, title, description}) => {
+	let prevDirectory, location, directory, preview;
+	const video = await getVideo(id);
 	if (!video) return null;
 	if (file) {
-		console.log('loaded file : ', await file);
-		const {filename, mimetype, createReadStream} = await file;
-		const stream = createReadStream();
-		const pathObj = await storeFileStream({stream, filename});
-		location = pathObj.path;
-		await fs.unlink(video.get('location'), (err) => err);
+		prevDirectory = video.get('directory');
+		({location, directory, preview} = await handleUploadVideo({file}));
 	}
-	if (video) {
-		video.update({
-			location,
-			title,
-			description
-		});
-		return video;
-	}
-	return null;
+	await video.update({
+		location,
+		directory,
+		preview,
+		title,
+		description
+	});
+	if (prevDirectory) await handleRemoveVideo({directory: prevDirectory});
+	return video;
+
 };
 
 const deleteVideo = async (id) => {
-	const video = await  models.Video.findByPk(id);
+	const video = await getVideo(id);
 	if (video) {
-		await video.destroy({returning: true, checkExistance: true});
+		await video.update({deleted: true});
+		// TODO if we really want to delete video files, exec this code
+		// await handleRemoveVideo({directory: video.get('directory')});
 	}
-	const error = await fs.unlink(video.get('location'), (err) => err);
 	return {
-		success: !error,
-		error,
-	};
+		success: true,
+		error: null,
+	}
 };
 
 const searchVideo = async (searchQuery = '') => {
@@ -116,5 +158,6 @@ module.exports = {
 	loadVideo,
 	editVideoData,
 	deleteVideo,
-	searchVideo
+	searchVideo,
+	createFolder
 };
